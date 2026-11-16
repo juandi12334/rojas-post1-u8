@@ -5,6 +5,10 @@
 ; Compilar: nasm -f bin post2d.asm -o post2d.com
 ORG 100h
 
+; digitos desempaquetados usados en las pruebas
+DIG_SIETE  equ 07h
+DIG_OCHO   equ 08h
+
 %macro imprimir 1
   mov ah, 09h
   mov dx, %1
@@ -16,8 +20,8 @@ start:
   ; ---------- Suma desempaquetada con AAA ----------
   imprimir msgSuma
 
-  mov ax, 0007h           ; AH=0 (importante: AAA le suma el acarreo), AL=7
-  add al, 08h             ; AL = 0Fh, no es BCD desempaquetado valido
+  mov ax, DIG_SIETE      ; AH=0 (importante: AAA le suma el acarreo), AL=7
+  add al, DIG_OCHO        ; AL = 0Fh, no es BCD desempaquetado valido
   mov [crudo], al
   aaa                     ; AL = 05h, AH = AH + 1 = 01h, CF=1
   mov [decena], ah
@@ -38,7 +42,7 @@ start:
   imprimir msgResta
 
   mov ax, 0103h           ; AH=1 (decena de "13"), AL=3 (unidad de "13")
-  sub al, 08h             ; AL = 03h - 08h = FBh, hay prestamo
+  sub al, DIG_OCHO        ; AL = 03h - 08h = FBh, hay prestamo
   mov [crudo], al
   aas                     ; AL = 05h, AH = AH - 1 = 00h, CF=1
   mov [decena], ah

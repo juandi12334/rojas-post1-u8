@@ -8,6 +8,15 @@
 ;      post2b.com r   -> solo las restas con DAS (Checkpoint 4)
 ORG 100h
 
+; operandos BCD empaquetado usados en las pruebas
+BCD_NOVENTA_Y_NUEVE equ 99h
+BCD_UNO             equ 01h
+BCD_SETENTA_Y_TRES  equ 73h
+BCD_VEINTIOCHO      equ 28h
+BCD_VEINTE          equ 20h
+BCD_ESPERADO_73_28  equ 45h
+BCD_ESPERADO_20_01  equ 19h
+
 %macro imprimir 1
   mov ah, 09h
   mov dx, %1
@@ -53,8 +62,8 @@ start:
   imprimir crlf
 
   ; ---------- Suma 99 + 01 (acarreo al siguiente byte BCD) ----------
-  mov al, 99h
-  add al, 01h             ; AL = 9Ah
+  mov al, BCD_NOVENTA_Y_NUEVE
+  add al, BCD_UNO             ; AL = 9Ah
   mov [crudo], al
   daa                     ; 9Ah -> A0h -> 00h con CF=1
   mov [ajustado], al
@@ -80,12 +89,12 @@ start:
 
   ; ---------- Resta 73 - 28 ----------
 .restas:
-  mov al, 73h
-  sub al, 28h             ; AL = 4Bh, no es BCD valido
+  mov al, BCD_SETENTA_Y_TRES
+  sub al, BCD_VEINTIOCHO             ; AL = 4Bh, no es BCD valido
   mov [crudo], al
   das                     ; nibble bajo B > 9: resta 6 -> AL = 45h
   mov [ajustado], al
-  cmp al, 45h
+  cmp al, BCD_ESPERADO_73_28
   jne .errDas1
   imprimir msgDasOk
   mov al, [ajustado]
@@ -104,12 +113,12 @@ start:
   imprimir crlf
 
   ; ---------- Resta 20 - 01 (caso con prestamo en el nibble bajo) ----------
-  mov al, 20h
-  sub al, 01h             ; AL = 1Fh: nibble bajo = Fh > 9
+  mov al, BCD_VEINTE
+  sub al, BCD_UNO             ; AL = 1Fh: nibble bajo = Fh > 9
   mov [crudo], al
   das                     ; AL = 19h, CF=0
   mov [ajustado], al
-  cmp al, 19h
+  cmp al, BCD_ESPERADO_20_01
   jne .errDas2
   imprimir msgDasOk
   mov al, [ajustado]
